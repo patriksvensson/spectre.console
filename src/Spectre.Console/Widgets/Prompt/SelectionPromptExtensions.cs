@@ -9,24 +9,6 @@ namespace Spectre.Console
     public static class SelectionPromptExtensions
     {
         /// <summary>
-        /// Adds a choice.
-        /// </summary>
-        /// <typeparam name="T">The prompt result type.</typeparam>
-        /// <param name="obj">The prompt.</param>
-        /// <param name="choice">The choice to add.</param>
-        /// <returns>The same instance so that multiple calls can be chained.</returns>
-        public static SelectionPrompt<T> AddChoice<T>(this SelectionPrompt<T> obj, T choice)
-        {
-            if (obj is null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            obj.Choices.Add(choice);
-            return obj;
-        }
-
-        /// <summary>
         /// Adds multiple choices.
         /// </summary>
         /// <typeparam name="T">The prompt result type.</typeparam>
@@ -34,13 +16,18 @@ namespace Spectre.Console
         /// <param name="choices">The choices to add.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> AddChoices<T>(this SelectionPrompt<T> obj, params T[] choices)
+            where T : notnull
         {
             if (obj is null)
             {
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            obj.Choices.AddRange(choices);
+            foreach (var choice in choices)
+            {
+                obj.AddChoice(choice);
+            }
+
             return obj;
         }
 
@@ -52,13 +39,18 @@ namespace Spectre.Console
         /// <param name="choices">The choices to add.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> AddChoices<T>(this SelectionPrompt<T> obj, IEnumerable<T> choices)
+            where T : notnull
         {
             if (obj is null)
             {
                 throw new ArgumentNullException(nameof(obj));
             }
 
-            obj.Choices.AddRange(choices);
+            foreach (var choice in choices)
+            {
+                obj.AddChoice(choice);
+            }
+
             return obj;
         }
 
@@ -70,6 +62,7 @@ namespace Spectre.Console
         /// <param name="title">The title markup text.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> Title<T>(this SelectionPrompt<T> obj, string? title)
+            where T : notnull
         {
             if (obj is null)
             {
@@ -88,6 +81,7 @@ namespace Spectre.Console
         /// <param name="pageSize">The number of choices that are displayed to the user.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> PageSize<T>(this SelectionPrompt<T> obj, int pageSize)
+            where T : notnull
         {
             if (obj is null)
             {
@@ -111,6 +105,7 @@ namespace Spectre.Console
         /// <param name="highlightStyle">The highlight style of the selected choice.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> HighlightStyle<T>(this SelectionPrompt<T> obj, Style highlightStyle)
+            where T : notnull
         {
             if (obj is null)
             {
@@ -129,6 +124,7 @@ namespace Spectre.Console
         /// <param name="text">The text to display.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> MoreChoicesText<T>(this SelectionPrompt<T> obj, string? text)
+            where T : notnull
         {
             if (obj is null)
             {
@@ -147,6 +143,7 @@ namespace Spectre.Console
         /// <param name="displaySelector">The function to get a display string for a given choice.</param>
         /// <returns>The same instance so that multiple calls can be chained.</returns>
         public static SelectionPrompt<T> UseConverter<T>(this SelectionPrompt<T> obj, Func<T, string>? displaySelector)
+            where T : notnull
         {
             if (obj is null)
             {

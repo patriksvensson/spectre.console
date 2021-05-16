@@ -1,31 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using Spectre.Console.Prompts;
 using Spectre.Console.Rendering;
 
 namespace Spectre.Console
 {
     /// <summary>
-    /// Represents a list prompt.
+    /// Represents a single list prompt.
     /// </summary>
     /// <typeparam name="T">The prompt result type.</typeparam>
-    public sealed class SelectionPrompt<T> : IPrompt<T>
+    public sealed class SelectionPrompt<T> : IPrompt<T>, IListPromptStrategy<T>
+        where T : notnull
     {
+        private readonly ListPromptTree<T> _tree;
+
         /// <summary>
         /// Gets or sets the title.
         /// </summary>
         public string? Title { get; set; }
-
-        /// <summary>
-        /// Gets the choices.
-        /// </summary>
-        public List<T> Choices { get; }
-
-        /// <summary>
-        /// Gets or sets the converter to get the display string for a choice. By default
-        /// the corresponding <see cref="TypeConverter"/> is used.
-        /// </summary>
-        public Func<T, string>? Converter { get; set; } = TypeConverterHelper.ConvertToString;
 
         /// <summary>
         /// Gets or sets the page size.
@@ -39,6 +32,12 @@ namespace Spectre.Console
         public Style? HighlightStyle { get; set; }
 
         /// <summary>
+        /// Gets or sets the converter to get the display string for a choice. By default
+        /// the corresponding <see cref="TypeConverter"/> is used.
+        /// </summary>
+        public Func<T, string>? Converter { get; set; }
+
+        /// <summary>
         /// Gets or sets the text that will be displayed if there are more choices to show.
         /// </summary>
         public string? MoreChoicesText { get; set; }
@@ -48,58 +47,99 @@ namespace Spectre.Console
         /// </summary>
         public SelectionPrompt()
         {
-            Choices = new List<T>();
+            _tree = new ListPromptTree<T>();
+        }
+
+        /// <summary>
+        /// Adds a choice.
+        /// </summary>
+        /// <param name="item">The item to add.</param>
+        /// <returns>A <see cref="ISelectionItem{T}"/> so that multiple calls can be chained.</returns>
+        public ISelectionItem<T> AddChoice(T item)
+        {
+            var node = new ListPromptItem<T>(item);
+            _tree.Add(node);
+            return node;
         }
 
         /// <inheritdoc/>
-        T IPrompt<T>.Show(IAnsiConsole console)
+        public T Show(IAnsiConsole console)
         {
-            if (!console.Profile.Capabilities.Interactive)
+            // Create the list prompt
+            var prompt = new ListPrompt<T>(console, this);
+            var result = prompt.Show(_tree);
+
+            // Return the selected item
+            return result.Items[result.Index].Data;
+        }
+
+        /// <inheritdoc/>
+        ListPromptInputResult IListPromptStrategy<T>.HandleInput(ConsoleKeyInfo key, ListPromptState<T> state)
+        {
+            if (key.Key == ConsoleKey.Enter || key.Key == ConsoleKey.Spacebar)
             {
-                throw new NotSupportedException(
-                    "Cannot show selection prompt since the current " +
-                    "terminal isn't interactive.");
+                return ListPromptInputResult.Submit;
             }
 
-            if (!console.Profile.Capabilities.Ansi)
+            return ListPromptInputResult.None;
+        }
+
+        /// <inheritdoc/>
+        int IListPromptStrategy<T>.CalculatePageSize(IAnsiConsole console, int totalItemCount, int requestedPageSize)
+        {
+            if (requestedPageSize > console.Profile.Height - 4)
             {
-                throw new NotSupportedException(
-                    "Cannot show selection prompt since the current " +
-                    "terminal does not support ANSI escape sequences.");
+                return console.Profile.Height - 4;
             }
 
-            return console.RunExclusive(() =>
-            {
-                var converter = Converter ?? TypeConverterHelper.ConvertToString;
-                var list = new RenderableSelectionList<T>(
-                    console, Title, PageSize, Choices,
-                    converter, HighlightStyle, MoreChoicesText);
+            return requestedPageSize;
+        }
 
-                using (new RenderHookScope(console, list))
+        /// <inheritdoc/>
+        IRenderable IListPromptStrategy<T>.Render(IAnsiConsole console, bool scrollable, int cursorIndex, IEnumerable<(int Index, ListPromptItem<T> Node)> items)
+        {
+            var list = new List<IRenderable>();
+            var highlightStyle = HighlightStyle ?? new Style(foreground: Color.Blue);
+
+            if (Title != null)
+            {
+                list.Add(new Markup(Title));
+            }
+
+            var grid = new Grid();
+            grid.AddColumn(new GridColumn().Padding(0, 0, 1, 0).NoWrap());
+
+            if (Title != null)
+            {
+                grid.AddEmptyRow();
+            }
+
+            foreach (var item in items)
+            {
+                var current = item.Index == cursorIndex;
+                var prompt = item.Index == cursorIndex ? ListPromptConstants.Arrow : new string(' ', ListPromptConstants.Arrow.Length);
+                var style = current ? highlightStyle : Style.Plain;
+                var indent = new string(' ', item.Node.Depth * 2);
+
+                var text = (Converter ?? TypeConverterHelper.ConvertToString)?.Invoke(item.Node.Data) ?? item.Node.Data.ToString() ?? "?";
+                if (current)
                 {
-                    console.Cursor.Hide();
-                    list.Redraw();
-
-                    while (true)
-                    {
-                        var key = console.Input.ReadKey(true);
-                        if (key.Key == ConsoleKey.Enter || key.Key == ConsoleKey.Spacebar)
-                        {
-                            break;
-                        }
-
-                        if (list.Update(key.Key))
-                        {
-                            list.Redraw();
-                        }
-                    }
+                    text = text.RemoveMarkup();
                 }
 
-                list.Clear();
-                console.Cursor.Show();
+                grid.AddRow(new Markup(indent + prompt + " " + text, style));
+            }
 
-                return Choices[list.Index];
-            });
+            list.Add(grid);
+
+            if (scrollable)
+            {
+                // (Move up and down to reveal more choices)
+                list.Add(Text.Empty);
+                list.Add(new Markup(MoreChoicesText ?? ListPromptConstants.MoreChoicesMarkup));
+            }
+
+            return new Rows(list);
         }
     }
 }
