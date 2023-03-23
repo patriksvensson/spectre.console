@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+
+    <InternalsVisibleTo Include="Spectre.Console.Cli" />
+    <InternalsVisibleTo Include="Spectre.Console.Cli.Tests" />
+    <InternalsVisibleTo Include="Spectre.Console.Tests" />
     <AdditionalFiles Include="..\stylecop.json" Link="Properties/stylecop.json" />
     <EmbeddedResource Include="Widgets\Figlet\Fonts\Standard.flf" />
     <None Remove="Widgets\Figlet\Fonts\Standard.flf" />
@@ -15,17 +19,14 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.1.0">
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
+    <PackageReference Include="Polyfill" Version="1.1.0" PrivateAssets="all" />
     <PackageReference Include="Wcwidth.Sources" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.5"
-                      Condition=" $(TargetFramework) == 'netstandard2.0'" />
+    <PackageReference Include="System.Memory" Version="4.5.5" Condition=" $(TargetFramework) == 'netstandard2.0'" />
   </ItemGroup>
 
   <ItemGroup>
