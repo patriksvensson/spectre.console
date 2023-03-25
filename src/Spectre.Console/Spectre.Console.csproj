@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Polyfill" Version="1.1.0" PrivateAssets="all" />
+    <PackageReference Include="Polyfill" Version="1.4.0" PrivateAssets="all" />
     <PackageReference Include="Wcwidth.Sources" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
