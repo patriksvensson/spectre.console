@@ -202,11 +202,6 @@ public static class StringExtensions
             return output;
         }
 
-        foreach (var c in value)
-        {
-            output += mask;
-        }
-
-        return output;
+        return new string(mask.Value, value.Length);
     }
 }
