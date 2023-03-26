@@ -180,11 +180,7 @@ public static class StringExtensions
 
     internal static bool ContainsExact(this string text, string value)
     {
-#if NETSTANDARD2_0
-        return text.Contains(value);
-#else
         return text.Contains(value, StringComparison.Ordinal);
-#endif
     }
 
     /// <summary>

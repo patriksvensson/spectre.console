@@ -162,11 +162,7 @@ public sealed class Style : IEquatable<Style>
     {
         int? GetLinkHashCode()
         {
-#if NETSTANDARD2_0
-            return Link?.GetHashCode();
-#else
             return Link?.GetHashCode(StringComparison.Ordinal);
-#endif
         }
 
         unchecked
