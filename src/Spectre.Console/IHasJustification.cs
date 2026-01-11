@@ -20,7 +20,7 @@ public static class HasJustificationExtensions
     /// Sets the justification for an <see cref="IHasJustification"/> object.
     /// </summary>
     /// <typeparam name="T">The type that can be justified.</typeparam>
-    /// <param name="obj">The alignable object.</param>
+    /// <param name="obj">The justifiable object.</param>
     /// <param name="alignment">The alignment.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static T Justify<T>(this T obj, Justify? alignment)
@@ -36,7 +36,7 @@ public static class HasJustificationExtensions
     /// Sets the <see cref="IHasJustification"/> object to be left justified.
     /// </summary>
     /// <typeparam name="T">The type that can be justified.</typeparam>
-    /// <param name="obj">The alignable object.</param>
+    /// <param name="obj">The justifiable object.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static T LeftJustified<T>(this T obj)
         where T : class, IHasJustification
@@ -51,7 +51,7 @@ public static class HasJustificationExtensions
     /// Sets the <see cref="IHasJustification"/> object to be centered.
     /// </summary>
     /// <typeparam name="T">The type that can be justified.</typeparam>
-    /// <param name="obj">The alignable object.</param>
+    /// <param name="obj">The justifiable object.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static T Centered<T>(this T obj)
         where T : class, IHasJustification
@@ -66,7 +66,7 @@ public static class HasJustificationExtensions
     /// Sets the <see cref="IHasJustification"/> object to be right justified.
     /// </summary>
     /// <typeparam name="T">The type that can be justified.</typeparam>
-    /// <param name="obj">The alignable object.</param>
+    /// <param name="obj">The justifiable object.</param>
     /// <returns>The same instance so that multiple calls can be chained.</returns>
     public static T RightJustified<T>(this T obj)
         where T : class, IHasJustification

@@ -54,13 +54,15 @@ public static partial class AnsiConsoleExtensions
 
                     if (mask != null)
                     {
-                        if (UnicodeCalculator.GetWidth(lastChar) == 1)
+                        var cellWidth = lastChar.GetCellWidth();
+                        switch (cellWidth)
                         {
-                            console.Write("\b \b");
-                        }
-                        else if (UnicodeCalculator.GetWidth(lastChar) == 2)
-                        {
-                            console.Write("\b \b\b \b");
+                            case 1:
+                                console.Write("\b \b");
+                                break;
+                            case 2:
+                                console.Write("\b \b\b \b");
+                                break;
                         }
                     }
                 }

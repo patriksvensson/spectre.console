@@ -4,29 +4,20 @@ internal static class StyleParser
 {
     public static Style Parse(string text)
     {
-        var style = Parse(text, out var error);
-        if (error != null)
-        {
-            throw new InvalidOperationException(error);
-        }
-
-        if (style == null)
-        {
-            // This should not happen, but we need to please the compiler
-            // which cannot know that style isn't null here.
-            throw new InvalidOperationException("Could not parse style.");
-        }
-
-        return style;
+        return Parse(text, out var style, out var error)
+            ? style
+            : throw new InvalidOperationException(error);
     }
 
     public static bool TryParse(string text, out Style? style)
     {
-        style = Parse(text, out var error);
-        return error == null;
+        return Parse(text, out style, out _);
     }
 
-    private static Style? Parse(string text, out string? error)
+    private static bool Parse(
+        string text,
+        [NotNullWhen(true)] out Style? result,
+        [NotNullWhen(false)] out string? error)
     {
         var effectiveDecoration = (Decoration?)null;
         var effectiveForeground = (Color?)null;
@@ -53,13 +44,15 @@ internal static class StyleParser
                 if (effectiveLink != null)
                 {
                     error = "A link has already been set.";
-                    return null;
+                    result = null;
+                    return false;
                 }
 
                 effectiveLink = part.Substring(5);
                 continue;
             }
-            else if (part.StartsWith("link", StringComparison.OrdinalIgnoreCase))
+
+            if (part.StartsWith("link", StringComparison.OrdinalIgnoreCase))
             {
                 effectiveLink = Constants.EmptyLink;
                 continue;
@@ -74,7 +67,7 @@ internal static class StyleParser
             }
             else
             {
-                var color = ColorTable.GetColor(part);
+                var color = Color.FromName(part);
                 if (color == null)
                 {
                     if (part.StartsWith("#", StringComparison.OrdinalIgnoreCase))
@@ -82,7 +75,8 @@ internal static class StyleParser
                         color = ParseHexColor(part, out error);
                         if (!string.IsNullOrWhiteSpace(error))
                         {
-                            return null;
+                            result = null;
+                            return false;
                         }
                     }
                     else if (part.StartsWith("rgb", StringComparison.OrdinalIgnoreCase))
@@ -90,23 +84,26 @@ internal static class StyleParser
                         color = ParseRgbColor(part, out error);
                         if (!string.IsNullOrWhiteSpace(error))
                         {
-                            return null;
+                            result = null;
+                            return false;
                         }
                     }
                     else if (int.TryParse(part, out var number))
                     {
-                        if (number < 0)
+                        switch (number)
                         {
-                            error = $"Color number must be greater than or equal to 0 (was {number})";
-                            return null;
+                            case < 0:
+                                error = $"Color number must be greater than or equal to 0 (was {number})";
+                                result = null;
+                                return false;
+                            case > 255:
+                                error = $"Color number must be less than or equal to 255 (was {number})";
+                                result = null;
+                                return false;
+                            default:
+                                color = number;
+                                break;
                         }
-                        else if (number > 255)
-                        {
-                            error = $"Color number must be less than or equal to 255 (was {number})";
-                            return null;
-                        }
-
-                        color = number;
                     }
                     else
                     {
@@ -114,7 +111,8 @@ internal static class StyleParser
                             ? $"Could not find color '{part}'."
                             : $"Could not find color or style '{part}'.";
 
-                        return null;
+                        result = null;
+                        return false;
                     }
                 }
 
@@ -123,7 +121,8 @@ internal static class StyleParser
                     if (effectiveForeground != null)
                     {
                         error = "A foreground color has already been set.";
-                        return null;
+                        result = null;
+                        return false;
                     }
 
                     effectiveForeground = color;
@@ -133,7 +132,8 @@ internal static class StyleParser
                     if (effectiveBackground != null)
                     {
                         error = "A background color has already been set.";
-                        return null;
+                        result = null;
+                        return false;
                     }
 
                     effectiveBackground = color;
@@ -142,37 +142,36 @@ internal static class StyleParser
         }
 
         error = null;
-        return new Style(
+        result = new(
             effectiveForeground,
             effectiveBackground,
             effectiveDecoration,
             effectiveLink);
+
+        return true;
     }
 
     private static Color? ParseHexColor(string hex, out string? error)
     {
         error = null;
-
-        hex ??= string.Empty;
         hex = hex.ReplaceExact("#", string.Empty).Trim();
 
         try
         {
             if (!string.IsNullOrWhiteSpace(hex))
             {
-                if (hex.Length == 6)
+                switch (hex.Length)
                 {
-                    return new Color(
-                        (byte)Convert.ToUInt32(hex.Substring(0, 2), 16),
-                        (byte)Convert.ToUInt32(hex.Substring(2, 2), 16),
-                        (byte)Convert.ToUInt32(hex.Substring(4, 2), 16));
-                }
-                else if (hex.Length == 3)
-                {
-                    return new Color(
-                        (byte)Convert.ToUInt32(new string(hex[0], 2), 16),
-                        (byte)Convert.ToUInt32(new string(hex[1], 2), 16),
-                        (byte)Convert.ToUInt32(new string(hex[2], 2), 16));
+                    case 6:
+                        return new Color(
+                            (byte)Convert.ToUInt32(hex.Substring(0, 2), 16),
+                            (byte)Convert.ToUInt32(hex.Substring(2, 2), 16),
+                            (byte)Convert.ToUInt32(hex.Substring(4, 2), 16));
+                    case 3:
+                        return new Color(
+                            (byte)Convert.ToUInt32(new(hex[0], 2), 16),
+                            (byte)Convert.ToUInt32(new(hex[1], 2), 16),
+                            (byte)Convert.ToUInt32(new(hex[2], 2), 16));
                 }
             }
         }

@@ -53,16 +53,6 @@ public static class StringExtensions
         return result.ToString();
     }
 
-    /// <summary>
-    /// Gets the cell width of the specified text.
-    /// </summary>
-    /// <param name="text">The text to get the cell width of.</param>
-    /// <returns>The cell width of the text.</returns>
-    public static int GetCellWidth(this string text)
-    {
-        return Cell.GetCellLength(text);
-    }
-
     internal static string CapitalizeFirstLetter(this string? text, CultureInfo? culture = null)
     {
         if (text == null)

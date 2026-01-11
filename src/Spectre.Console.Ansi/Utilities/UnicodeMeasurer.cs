@@ -1,6 +1,6 @@
 namespace Spectre.Console;
 
-internal static class Cell
+internal static class UnicodeMeasurer
 {
     private const sbyte Sentinel = -2;
 
@@ -11,7 +11,7 @@ internal static class Cell
     /// </summary>
     private static readonly sbyte[] _runeWidthCache = new sbyte[char.MaxValue + 1];
 
-    static Cell()
+    static UnicodeMeasurer()
     {
 #if !NETSTANDARD2_0
         Array.Fill(_runeWidthCache, Sentinel);
@@ -25,17 +25,12 @@ internal static class Cell
 
     public static int GetCellLength(string text)
     {
-        var sum = 0;
-        for (var index = 0; index < text.Length; index++)
-        {
-            var rune = text[index];
-            sum += GetCellLength(rune);
-        }
-
-        return sum;
+        // TODO: Investigate why `UnicodeCalculator.GetWidth` fails for strings.
+        // That version takes a lot of other things into account that we probably want.
+        return text.Sum(GetCellLength);
     }
 
-    public static int GetCellLength(char rune)
+    public static int GetCellLength(char character)
     {
         // TODO: We need to figure out why Segment.SplitLines fails
         // if we let wcwidth (which returns -1 instead of 1)
@@ -43,18 +38,17 @@ internal static class Cell
         // That is correct from a Unicode perspective, but the
         // algorithm was written before wcwidth was added and used
         // to work with string length and not cell length.
-        if (rune == '\n')
+        if (character == '\n')
         {
             return 1;
         }
 
-        var width = _runeWidthCache[rune];
+        var width = _runeWidthCache[character];
         if (width == Sentinel)
         {
-            _runeWidthCache[rune] = (sbyte)UnicodeCalculator.GetWidth(rune);
-            return _runeWidthCache[rune];
+            width = _runeWidthCache[character] = (sbyte)UnicodeCalculator.GetWidth(character);
         }
 
-        return _runeWidthCache[rune];
+        return width;
     }
 }

@@ -141,7 +141,7 @@ public sealed class SpinnerColumn : ProgressColumn
                     Math.Max(
                     ((IRenderable)new Markup(PendingText ?? " ")).Measure(options, int.MaxValue).Max,
                     ((IRenderable)new Markup(CompletedText ?? " ")).Measure(options, int.MaxValue).Max),
-                    spinner.Frames.Max(frame => Cell.GetCellLength(frame)));
+                    spinner.Frames.Max(frame => frame.GetCellWidth()));
             }
 
             return _maxWidth.Value;

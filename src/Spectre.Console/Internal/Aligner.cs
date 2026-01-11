@@ -9,7 +9,7 @@ internal static class Aligner
             return text;
         }
 
-        var width = Cell.GetCellLength(text);
+        var width = text.GetCellWidth();
         if (width >= maxWidth)
         {
             return text;

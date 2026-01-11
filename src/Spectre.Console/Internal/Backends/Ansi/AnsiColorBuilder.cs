@@ -20,7 +20,7 @@ internal static class AnsiColorBuilder
         var number = color.Number;
         if (number == null || color.Number >= 8)
         {
-            number = ColorPalette.ExactOrClosest(ColorSystem.Legacy, color).Number;
+            number = color.ExactOrClosest(ColorSystem.Legacy).Number;
         }
 
         Debug.Assert(number >= 0 && number < 8, "Invalid range for 4-bit color");
@@ -34,7 +34,7 @@ internal static class AnsiColorBuilder
         var number = color.Number;
         if (number == null || color.Number >= 16)
         {
-            number = ColorPalette.ExactOrClosest(ColorSystem.Standard, color).Number;
+            number = color.ExactOrClosest(ColorSystem.Standard).Number;
         }
 
         Debug.Assert(number >= 0 && number < 16, "Invalid range for 4-bit color");
@@ -45,7 +45,7 @@ internal static class AnsiColorBuilder
 
     private static IEnumerable<byte> GetEightBit(Color color, bool foreground)
     {
-        var number = color.Number ?? ColorPalette.ExactOrClosest(ColorSystem.EightBit, color).Number;
+        var number = color.Number ?? color.ExactOrClosest(ColorSystem.EightBit).Number;
         Debug.Assert(number >= 0 && number <= 255, "Invalid range for 8-bit color");
 
         var mod = foreground ? (byte)38 : (byte)48;

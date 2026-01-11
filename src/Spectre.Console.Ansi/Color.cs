@@ -12,7 +12,7 @@ public readonly partial struct Color : IEquatable<Color>
 
     static Color()
     {
-        Default = new Color(0, 0, 0, 0, true);
+        Default = new(0, 0, 0, 0, true);
     }
 
     /// <summary>
@@ -33,12 +33,12 @@ public readonly partial struct Color : IEquatable<Color>
     /// <summary>
     /// Gets the number of the color, if any.
     /// </summary>
-    internal byte? Number { get; }
+    public byte? Number { get; }
 
     /// <summary>
     /// Gets a value indicating whether or not this is the default color.
     /// </summary>
-    internal bool IsDefault { get; }
+    public bool IsDefault { get; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Color"/> struct.
@@ -64,7 +64,7 @@ public readonly partial struct Color : IEquatable<Color>
     public Color Blend(Color other, float factor)
     {
         // https://github.com/willmcgugan/rich/blob/f092b1d04252e6f6812021c0f415dd1d7be6a16a/rich/color.py#L494
-        return new Color(
+        return new(
             (byte)(R + ((other.R - R) * factor)),
             (byte)(G + ((other.G - G) * factor)),
             (byte)(B + ((other.B - B) * factor)));
@@ -82,6 +82,16 @@ public readonly partial struct Color : IEquatable<Color>
             R.ToString("X2", CultureInfo.InvariantCulture),
             G.ToString("X2", CultureInfo.InvariantCulture),
             B.ToString("X2", CultureInfo.InvariantCulture));
+    }
+
+    /// <summary>
+    /// Gets the exact or closest color in the specified <see cref="ColorSystem"/>.
+    /// </summary>
+    /// <param name="system">The color system.</param>
+    /// <returns>The exact or closest color in the specified <see cref="ColorSystem"/>.</returns>
+    public Color ExactOrClosest(ColorSystem system)
+    {
+        return ColorPalette.ExactOrClosest(system, this);
     }
 
     /// <inheritdoc/>
@@ -238,7 +248,7 @@ public readonly partial struct Color : IEquatable<Color>
         var g = byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
         var b = byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
 
-        return new Color(r, g, b);
+        return new(r, g, b);
     }
 
     /// <summary>
@@ -259,6 +269,16 @@ public readonly partial struct Color : IEquatable<Color>
             color = Color.Default;
             return false;
         }
+    }
+
+    /// <summary>
+    /// Gets a <see cref="Color"/> from its name.
+    /// </summary>
+    /// <param name="name">The name of the color.</param>
+    /// <returns>The requested <see cref="Color"/> or <c>null</c> if not found.</returns>
+    public static Color? FromName(string name)
+    {
+        return ColorTable.GetColor(name);
     }
 
     /// <summary>

@@ -131,19 +131,19 @@ public sealed class TextPath : IRenderable, IHasJustification
         }
 
         // Will it fit as is?
-        if (_parts.Sum(Cell.GetCellLength) + (_parts.Length - 1) <= maxWidth)
+        if (_parts.Sum(p => p.GetCellWidth()) + (_parts.Length - 1) <= maxWidth)
         {
             return _parts;
         }
 
         var ellipsis = options.Unicode ? UnicodeEllipsis : Ellipsis;
-        var ellipsisLength = Cell.GetCellLength(ellipsis);
+        var ellipsisLength = ellipsis.GetCellWidth();
 
         if (_parts.Length >= 2)
         {
             var skip = _rooted ? 1 : 0;
             var separatorCount = _rooted ? 2 : 1;
-            var rootLength = _rooted ? Cell.GetCellLength(_parts[0]) : 0;
+            var rootLength = _rooted ? _parts[0].GetCellWidth() : 0;
 
             // Try popping parts until it fits
             var queue = new Queue<string>(_parts.Skip(skip).Take(_parts.Length - separatorCount));
@@ -156,8 +156,8 @@ public sealed class TextPath : IRenderable, IHasJustification
                 var queueWidth =
                         rootLength // Root (if rooted)
                         + ellipsisLength // Ellipsis
-                        + queue.Sum(Cell.GetCellLength) // Middle
-                        + Cell.GetCellLength(_parts.Last()) // Last
+                        + queue.Sum(p => p.GetCellWidth()) // Middle
+                        + _parts[^1].GetCellWidth() // Last
                         + queue.Count + separatorCount; // Separators
 
                 // Will it fit?

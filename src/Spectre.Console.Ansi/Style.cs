@@ -29,7 +29,7 @@ public sealed class Style : IEquatable<Style>
     /// Gets a <see cref="Style"/> with the
     /// default colors and without text decoration.
     /// </summary>
-    public static Style Plain { get; } = new Style();
+    public static Style Plain { get; } = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Style"/> class.
@@ -54,7 +54,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithForeground(Color color)
     {
-        return new Style(foreground: color);
+        return new(foreground: color);
     }
 
     /// <summary>
@@ -65,7 +65,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithBackground(Color color)
     {
-        return new Style(background: color);
+        return new(background: color);
     }
 
     /// <summary>
@@ -76,7 +76,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithDecoration(Decoration decoration)
     {
-        return new Style(decoration: decoration);
+        return new(decoration: decoration);
     }
 
     /// <summary>
@@ -87,7 +87,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithLink(string link)
     {
-        return new Style(link: link);
+        return new(link: link);
     }
 
     /// <summary>
@@ -117,7 +117,7 @@ public sealed class Style : IEquatable<Style>
             link = other.Link;
         }
 
-        return new Style(foreground, background, Decoration | other.Decoration, link);
+        return new(foreground, background, Decoration | other.Decoration, link);
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public sealed class Style : IEquatable<Style>
     /// <param name="color">The foreground color.</param>
     public static implicit operator Style(Color color)
     {
-        return new Style(foreground: color);
+        return new(foreground: color);
     }
 
     /// <summary>
@@ -268,7 +268,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new Style(
+        return new(
             foreground: color,
             background: style.Background,
             decoration: style.Decoration);
@@ -285,7 +285,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new Style(
+        return new(
             foreground: style.Foreground,
             background: color,
             decoration: style.Decoration);
@@ -302,7 +302,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new Style(
+        return new(
             foreground: style.Foreground,
             background: style.Background,
             decoration: decoration);
@@ -319,14 +319,20 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new Style(
+        return new(
             foreground: style.Foreground,
             background: style.Background,
             decoration: style.Decoration,
             link: link);
     }
 
-    internal static Style Combine(this Style style, IEnumerable<Style> source)
+    /// <summary>
+    /// Combines this style with other styles.
+    /// </summary>
+    /// <param name="style">The style.</param>
+    /// <param name="source">The styles to combine with this.</param>
+    /// <returns>A new style representing a combination of this and the other styles.</returns>
+    public static Style Combine(this Style style, IEnumerable<Style> source)
     {
         ArgumentNullException.ThrowIfNull(style);
 

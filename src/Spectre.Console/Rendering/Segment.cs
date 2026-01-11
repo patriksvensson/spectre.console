@@ -102,7 +102,7 @@ public class Segment
             return 0;
         }
 
-        return Cell.GetCellLength(Text);
+        return Text.GetCellWidth();
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public class Segment
             foreach (var character in Text)
             {
                 index++;
-                accumulated += Cell.GetCellLength(character);
+                accumulated += character.GetCellWidth();
                 if (accumulated >= offset)
                 {
                     break;
@@ -566,14 +566,14 @@ public class Segment
         var sb = new StringBuilder();
         foreach (var ch in text)
         {
-            if (length + UnicodeCalculator.GetWidth(ch) > maxCellLength)
+            if (length + ch.GetCellWidth() > maxCellLength)
             {
                 list.Add(sb.ToString());
                 sb.Clear();
                 length = 0;
             }
 
-            length += UnicodeCalculator.GetWidth(ch);
+            length += ch.GetCellWidth();
             sb.Append(ch);
         }
 
