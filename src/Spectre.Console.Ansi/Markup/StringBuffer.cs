@@ -25,17 +25,6 @@ internal sealed class StringBuffer : IDisposable
         _reader.Dispose();
     }
 
-    public char Expect(char character)
-    {
-        var read = Read();
-        if (read != character)
-        {
-            throw new InvalidOperationException($"Expected '{character}', but found '{read}'");
-        }
-
-        return read;
-    }
-
     public char Peek()
     {
         if (Eof)

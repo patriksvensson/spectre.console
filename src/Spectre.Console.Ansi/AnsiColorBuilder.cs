@@ -1,4 +1,4 @@
-namespace Spectre.Console.Abstractions;
+namespace Spectre.Console;
 
 internal static class AnsiColorBuilder
 {

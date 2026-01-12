@@ -39,7 +39,12 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
     /// <param name="style">The style of the text.</param>
     public Markup(string text, Style? style = null)
     {
-        _paragraph = MarkupParser.Parse(text, style);
+        _paragraph = new Paragraph();
+
+        foreach (var (segmentText, segmentStyle) in AnsiMarkup.Parse(text, style))
+        {
+            _paragraph.Append(Emoji.Replace(segmentText), segmentStyle);
+        }
     }
 
     /// <inheritdoc/>
@@ -103,7 +108,7 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
 
     internal static string EscapeInterpolated(IFormatProvider provider, FormattableString value)
     {
-        object?[] args = value.GetArguments().Select(arg => arg is string s ? s.EscapeMarkup() : arg).ToArray();
+        var args = value.GetArguments().Select(arg => arg is string s ? s.EscapeMarkup() : arg).ToArray();
         return string.Format(provider, value.Format, args);
     }
 }

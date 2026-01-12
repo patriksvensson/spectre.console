@@ -1,4 +1,4 @@
-namespace Spectre.Console.Abstractions;
+namespace Spectre.Console;
 
 public sealed class AnsiMarkup
 {
@@ -9,23 +9,23 @@ public sealed class AnsiMarkup
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
     }
 
-    public static IEnumerable<(string Text, Style Style)> Parse(string markup)
+    public static IEnumerable<(string Text, Style Style)> Parse(string markup, Style? style = null)
     {
-        return MarkupParser.Parse(markup);
+        return MarkupParser.Parse(markup, style);
     }
 
-    public void Write(string markup)
+    public void Write(string markup, Style? style = null)
     {
-        foreach (var (text, style) in MarkupParser.Parse(markup))
+        foreach (var (segmentText, segmentStyle) in MarkupParser.Parse(markup, style))
         {
-            if (!style.Equals(Style.Plain))
+            if (!segmentStyle.Equals(Style.Plain))
             {
-                _writer.Style(style);
+                _writer.Style(segmentStyle);
             }
 
-            _writer.Write(text);
+            _writer.Write(segmentText);
 
-            if (!style.Equals(Style.Plain))
+            if (!segmentStyle.Equals(Style.Plain))
             {
                 _writer.ResetStyle();
             }

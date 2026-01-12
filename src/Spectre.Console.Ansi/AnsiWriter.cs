@@ -1,6 +1,6 @@
 using System.IO;
 
-namespace Spectre.Console.Abstractions;
+namespace Spectre.Console;
 
 public sealed class AnsiWriter
 {
