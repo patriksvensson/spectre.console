@@ -64,7 +64,7 @@ public static class StringExtensions
         {
             if (tokenizer.Current.Kind == MarkupTokenKind.Text)
             {
-                result.Append(tokenizer.Current.Value);
+                result.Append(tokenizer.Current.Lexeme);
             }
         }
 
@@ -74,82 +74,12 @@ public static class StringExtensions
     /// <summary>
     /// Highlights the first text match in provided value.
     /// </summary>
-    /// <param name="value">Input value.</param>
-    /// <param name="searchText">Text to search for.</param>
-    /// <param name="highlightStyle">The style to apply to the matched text.</param>
+    /// <param name="markup">The markup containing text to highlight.</param>
+    /// <param name="query">The text to highlight within the markup.</param>
+    /// <param name="style">The style to apply to the matched text.</param>
     /// <returns>Markup of input with the first matched text highlighted.</returns>
-    public static string Highlight(this string value, string searchText, Style? highlightStyle)
+    public static string HighlightMarkup(this string markup, string query, Style style)
     {
-        ArgumentNullException.ThrowIfNull(value);
-        ArgumentNullException.ThrowIfNull(searchText);
-
-        if (searchText.Length == 0)
-        {
-            return value;
-        }
-
-        var foundSearchPattern = false;
-        var builder = new StringBuilder();
-        using var tokenizer = new MarkupTokenizer(value);
-        while (tokenizer.MoveNext())
-        {
-            var token = tokenizer.Current!;
-
-            switch (token.Kind)
-            {
-                case MarkupTokenKind.Text:
-                    {
-                        var tokenValue = token.Value;
-                        if (tokenValue.Length == 0)
-                        {
-                            break;
-                        }
-
-                        if (foundSearchPattern)
-                        {
-                            builder.Append(tokenValue);
-                            break;
-                        }
-
-                        var index = tokenValue.IndexOf(searchText, StringComparison.OrdinalIgnoreCase);
-                        if (index == -1)
-                        {
-                            builder.Append(tokenValue);
-                            break;
-                        }
-
-                        foundSearchPattern = true;
-                        var before = tokenValue.Substring(0, index);
-                        var match = tokenValue.Substring(index, searchText.Length);
-                        var after = tokenValue.Substring(index + searchText.Length);
-
-                        builder
-                            .Append(before)
-                            .AppendWithStyle(highlightStyle, match)
-                            .Append(after);
-
-                        break;
-                    }
-
-                case MarkupTokenKind.Open:
-                    {
-                        builder.Append("[" + token.Value + "]");
-                        break;
-                    }
-
-                case MarkupTokenKind.Close:
-                    {
-                        builder.Append("[/]");
-                        break;
-                    }
-
-                default:
-                    {
-                        throw new InvalidOperationException("Unknown markup token kind.");
-                    }
-            }
-        }
-
-        return builder.ToString();
+        return MarkupHighlighter.Highlight(markup, query, style);
     }
 }
