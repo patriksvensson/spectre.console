@@ -3,6 +3,7 @@ namespace Spectre.Console;
 /// <summary>
 /// Represents color and text decoration.
 /// </summary>
+[DebuggerDisplay("Style: {ToMarkup(),nq}")]
 public sealed class Style : IEquatable<Style>
 {
     /// <summary>
@@ -38,7 +39,9 @@ public sealed class Style : IEquatable<Style>
     /// <param name="background">The background color.</param>
     /// <param name="decoration">The text decoration.</param>
     /// <param name="link">The link.</param>
-    public Style(Color? foreground = null, Color? background = null, Decoration? decoration = null, string? link = null)
+    public Style(
+        Color? foreground = null, Color? background = null,
+        Decoration? decoration = null, string? link = null)
     {
         Foreground = foreground ?? Color.Default;
         Background = background ?? Color.Default;
@@ -54,7 +57,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithForeground(Color color)
     {
-        return new(foreground: color);
+        return new Style(foreground: color);
     }
 
     /// <summary>
@@ -65,7 +68,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithBackground(Color color)
     {
-        return new(background: color);
+        return new Style(background: color);
     }
 
     /// <summary>
@@ -76,7 +79,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithDecoration(Decoration decoration)
     {
-        return new(decoration: decoration);
+        return new Style(decoration: decoration);
     }
 
     /// <summary>
@@ -87,7 +90,7 @@ public sealed class Style : IEquatable<Style>
     [Obsolete("Use ctor(..) instead")]
     public static Style WithLink(string link)
     {
-        return new(link: link);
+        return new Style(link: link);
     }
 
     /// <summary>
@@ -117,7 +120,7 @@ public sealed class Style : IEquatable<Style>
             link = other.Link;
         }
 
-        return new(foreground, background, Decoration | other.Decoration, link);
+        return new Style(foreground, background, Decoration | other.Decoration, link);
     }
 
     /// <summary>
@@ -135,7 +138,7 @@ public sealed class Style : IEquatable<Style>
     /// <param name="color">The foreground color.</param>
     public static implicit operator Style(Color color)
     {
-        return new(foreground: color);
+        return new Style(foreground: color);
     }
 
     /// <summary>
@@ -246,9 +249,9 @@ public sealed class Style : IEquatable<Style>
         }
 
         return Foreground.Equals(other.Foreground) &&
-            Background.Equals(other.Background) &&
-            Decoration == other.Decoration &&
-            string.Equals(Link, other.Link, StringComparison.Ordinal);
+               Background.Equals(other.Background) &&
+               Decoration == other.Decoration &&
+               string.Equals(Link, other.Link, StringComparison.Ordinal);
     }
 }
 
@@ -268,7 +271,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new(
+        return new Style(
             foreground: color,
             background: style.Background,
             decoration: style.Decoration);
@@ -285,7 +288,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new(
+        return new Style(
             foreground: style.Foreground,
             background: color,
             decoration: style.Decoration);
@@ -302,7 +305,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new(
+        return new Style(
             foreground: style.Foreground,
             background: style.Background,
             decoration: decoration);
@@ -319,7 +322,7 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        return new(
+        return new Style(
             foreground: style.Foreground,
             background: style.Background,
             decoration: style.Decoration,
@@ -336,12 +339,6 @@ public static class StyleExtensions
     {
         ArgumentNullException.ThrowIfNull(style);
 
-        var current = style;
-        foreach (var item in source)
-        {
-            current = current.Combine(item);
-        }
-
-        return current;
+        return source.Aggregate(style, (current, item) => current.Combine(item));
     }
 }

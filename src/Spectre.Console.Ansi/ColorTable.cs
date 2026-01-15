@@ -8,7 +8,8 @@ internal static partial class ColorTable
     static ColorTable()
     {
         _numberLookup = GenerateTable();
-        _nameLookup = new();
+        _nameLookup = new Dictionary<int, string>();
+
         foreach (var pair in _numberLookup)
         {
             if (_nameLookup.ContainsKey(pair.Value))
@@ -22,7 +23,7 @@ internal static partial class ColorTable
 
     public static Color GetColor(int number)
     {
-        if (number < 0 || number > 255)
+        if (number is < 0 or > 255)
         {
             throw new InvalidOperationException("Color number must be between 0 and 255");
         }

@@ -55,6 +55,11 @@ internal static partial class ColorPalette
             _ => throw new NotSupportedException(),
         };
 
+        return Enumerable.Range(0, int.MaxValue)
+            .Zip(palette, (id, other) => (Distance: Distance(other, color), Id: id, Color: other))
+            .OrderBy(x => x.Distance)
+            .FirstOrDefault().Color;
+
         // https://stackoverflow.com/a/9085524
         static double Distance(Color first, Color second)
         {
@@ -67,10 +72,5 @@ internal static partial class ColorPalette
                 + (4 * g * g)
                 + ((int)((767 - rmean) * b * b) >> 8));
         }
-
-        return Enumerable.Range(0, int.MaxValue)
-            .Zip(palette, (id, other) => (Distance: Distance(other, color), Id: id, Color: other))
-            .OrderBy(x => x.Distance)
-            .FirstOrDefault().Color;
     }
 }

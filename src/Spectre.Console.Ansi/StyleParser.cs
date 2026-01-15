@@ -142,7 +142,7 @@ internal static class StyleParser
         }
 
         error = null;
-        result = new(
+        result = new Style(
             effectiveForeground,
             effectiveBackground,
             effectiveDecoration,
@@ -169,9 +169,9 @@ internal static class StyleParser
                             (byte)Convert.ToUInt32(hex.Substring(4, 2), 16));
                     case 3:
                         return new Color(
-                            (byte)Convert.ToUInt32(new(hex[0], 2), 16),
-                            (byte)Convert.ToUInt32(new(hex[1], 2), 16),
-                            (byte)Convert.ToUInt32(new(hex[2], 2), 16));
+                            (byte)Convert.ToUInt32(new string(hex[0], 2), 16),
+                            (byte)Convert.ToUInt32(new string(hex[1], 2), 16),
+                            (byte)Convert.ToUInt32(new string(hex[2], 2), 16));
                 }
             }
         }

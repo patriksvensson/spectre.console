@@ -16,7 +16,7 @@ public sealed class AnsiMarkup
 
     public void Write(string markup, Style? style = null)
     {
-        foreach (var (segmentText, segmentStyle) in MarkupParser.Parse(markup, style))
+        foreach (var (segmentText, segmentStyle) in Parse(markup, style))
         {
             if (!segmentStyle.Equals(Style.Plain))
             {

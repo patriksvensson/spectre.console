@@ -62,7 +62,7 @@ internal static class DecorationTable
             },
         };
 
-        _reverseLookup = new();
+        _reverseLookup = new Dictionary<Decoration, string>();
         foreach (var (name, decoration) in _lookup)
         {
             // Cannot happen, but the compiler thinks so...
@@ -71,10 +71,7 @@ internal static class DecorationTable
                 continue;
             }
 
-            if (!_reverseLookup.ContainsKey(decoration.Value))
-            {
-                _reverseLookup[decoration.Value] = name;
-            }
+            _reverseLookup.TryAdd(decoration.Value, name);
         }
     }
 

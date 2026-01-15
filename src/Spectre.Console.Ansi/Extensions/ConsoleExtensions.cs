@@ -8,13 +8,19 @@ public static class SystemConsoleExtensions
     private static readonly Lock _lock = new();
     private static AnsiWriter? _writer;
 
+    private static AnsiWriter GetAnsiWriter()
+    {
+        _writer ??= new AnsiWriter(System.Console.Out);
+        return _writer;
+    }
+
     extension(System.Console)
     {
         public static void Ansi(Action<AnsiWriter> action)
         {
             lock (_lock)
             {
-                var writer = System.Console.GetAnsiWriter();
+                var writer = GetAnsiWriter();
                 action(writer);
             }
         }
@@ -23,7 +29,7 @@ public static class SystemConsoleExtensions
         {
             lock (_lock)
             {
-                var writer = System.Console.GetAnsiWriter();
+                var writer = GetAnsiWriter();
                 writer.Markup(markup);
             }
         }
@@ -32,15 +38,9 @@ public static class SystemConsoleExtensions
         {
             lock (_lock)
             {
-                var writer = System.Console.GetAnsiWriter();
+                var writer = GetAnsiWriter();
                 writer.MarkupLine(markup);
             }
-        }
-
-        private static AnsiWriter GetAnsiWriter()
-        {
-            _writer ??= new AnsiWriter(System.Console.Out);
-            return _writer;
         }
     }
 }

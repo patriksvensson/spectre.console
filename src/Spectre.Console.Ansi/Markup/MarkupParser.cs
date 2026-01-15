@@ -2,7 +2,7 @@ namespace Spectre.Console;
 
 internal static class MarkupParser
 {
-    public static IEnumerable<(string text, Style style)> Parse(string text, Style? style = null)
+    public static IEnumerable<(string Text, Style Style)> Parse(string text, Style? style = null)
     {
         ArgumentNullException.ThrowIfNull(text);
 
@@ -22,7 +22,7 @@ internal static class MarkupParser
 
             if (token.Kind == MarkupTokenKind.Open)
             {
-                var parsedStyle = string.IsNullOrEmpty(token.Value) ? Style.Plain : Style.Parse(token.Value);
+                var parsedStyle = string.IsNullOrEmpty(token.Lexeme) ? Style.Plain : Style.Parse(token.Lexeme);
                 stack.Push(parsedStyle);
             }
             else if (token.Kind == MarkupTokenKind.Close)
@@ -38,7 +38,7 @@ internal static class MarkupParser
             {
                 // Get the effective style.
                 var effectiveStyle = style.Combine(stack.Reverse());
-                yield return (token.Value, effectiveStyle);
+                yield return (token.Lexeme, effectiveStyle);
             }
             else
             {

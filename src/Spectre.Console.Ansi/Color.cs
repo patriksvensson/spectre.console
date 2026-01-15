@@ -12,7 +12,7 @@ public readonly partial struct Color : IEquatable<Color>
 
     static Color()
     {
-        Default = new(0, 0, 0, 0, true);
+        Default = new Color(0, 0, 0, 0, true);
     }
 
     /// <summary>
@@ -64,7 +64,7 @@ public readonly partial struct Color : IEquatable<Color>
     public Color Blend(Color other, float factor)
     {
         // https://github.com/willmcgugan/rich/blob/f092b1d04252e6f6812021c0f415dd1d7be6a16a/rich/color.py#L494
-        return new(
+        return new Color(
             (byte)(R + ((other.R - R) * factor)),
             (byte)(G + ((other.G - G) * factor)),
             (byte)(B + ((other.B - B) * factor)));
@@ -181,14 +181,14 @@ public readonly partial struct Color : IEquatable<Color>
             return (ConsoleColor)(-1);
         }
 
-        if (color.Number == null || color.Number.Value >= 16)
+        if (color.Number is not < 16)
         {
             color = ColorPalette.ExactOrClosest(ColorSystem.Standard, color);
         }
 
         // Should not happen, but this will make things easier if we mess things up...
         Debug.Assert(
-            color.Number >= 0 && color.Number < 16,
+            color.Number is >= 0 and < 16,
             "Color does not fall inside the standard palette range.");
 
         return color.Number.Value switch
@@ -209,7 +209,8 @@ public readonly partial struct Color : IEquatable<Color>
             13 => ConsoleColor.Magenta,
             14 => ConsoleColor.Cyan,
             15 => ConsoleColor.White,
-            _ => throw new InvalidOperationException("Cannot convert color to console color."),
+            _ => throw new InvalidOperationException(
+                "Cannot convert color to console color."),
         };
     }
 
@@ -232,9 +233,9 @@ public readonly partial struct Color : IEquatable<Color>
     {
         ArgumentNullException.ThrowIfNull(hex);
 
-        if (hex.StartsWith("#"))
+        if (hex.StartsWith('#'))
         {
-            hex = hex.Substring(1);
+            hex = hex[1..];
         }
 
         // 3 digit hex codes are expanded to 6 digits
@@ -248,7 +249,7 @@ public readonly partial struct Color : IEquatable<Color>
         var g = byte.Parse(hex.Substring(2, 2), NumberStyles.HexNumber);
         var b = byte.Parse(hex.Substring(4, 2), NumberStyles.HexNumber);
 
-        return new(r, g, b);
+        return new Color(r, g, b);
     }
 
     /// <summary>
@@ -266,7 +267,7 @@ public readonly partial struct Color : IEquatable<Color>
         }
         catch
         {
-            color = Color.Default;
+            color = Default;
             return false;
         }
     }
@@ -330,7 +331,9 @@ public readonly partial struct Color : IEquatable<Color>
             }
         }
 
-        return string.Format(CultureInfo.InvariantCulture, "#{0:X2}{1:X2}{2:X2}", R, G, B);
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "#{0:X2}{1:X2}{2:X2}", R, G, B);
     }
 
     /// <inheritdoc/>
@@ -350,6 +353,8 @@ public readonly partial struct Color : IEquatable<Color>
             }
         }
 
-        return string.Format(CultureInfo.InvariantCulture, "#{0:X2}{1:X2}{2:X2} (RGB={0},{1},{2})", R, G, B);
+        return string.Format(
+            CultureInfo.InvariantCulture,
+            "#{0:X2}{1:X2}{2:X2} (RGB={0},{1},{2})", R, G, B);
     }
 }
