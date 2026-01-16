@@ -36,6 +36,15 @@ internal static class MarkupParser
             }
             else if (token.Kind == MarkupTokenKind.Text)
             {
+                if (stack.Count > 0)
+                {
+                    var lastStyle = stack.Peek();
+                    if (lastStyle.HasLink && lastStyle.Link == Constants.EmptyLink)
+                    {
+                        lastStyle.UpdateLink(token.Lexeme);
+                    }
+                }
+
                 // Get the effective style.
                 var effectiveStyle = style.Combine(stack.Reverse());
                 yield return (token.Lexeme, effectiveStyle);

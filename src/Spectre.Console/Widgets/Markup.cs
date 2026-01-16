@@ -41,9 +41,9 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
     {
         _paragraph = new Paragraph();
 
-        foreach (var (segmentText, segmentStyle) in AnsiMarkup.Parse(text, style))
+        foreach (var segment in AnsiMarkup.Parse(text, style))
         {
-            _paragraph.Append(Emoji.Replace(segmentText), segmentStyle);
+            _paragraph.Append(Emoji.Replace(segment.Text), segment.Style);
         }
     }
 
@@ -57,6 +57,30 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
     protected override IEnumerable<Segment> Render(RenderOptions options, int maxWidth)
     {
         return ((IRenderable)_paragraph).Render(options, maxWidth);
+    }
+
+    /// <summary>
+    /// Escapes text so that it won’t be interpreted as markup.
+    /// </summary>
+    /// <param name="text">The text to escape.</param>
+    /// <returns>A string that is safe to use in markup.</returns>
+    public static string Escape(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        return AnsiMarkup.Escape(text);
+    }
+
+    /// <summary>
+    /// Removes markup from the specified string.
+    /// </summary>
+    /// <param name="text">The text to remove markup from.</param>
+    /// <returns>A string that does not have any markup.</returns>
+    public static string Remove(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+
+        return AnsiMarkup.Remove(text);
     }
 
     /// <summary>
@@ -80,30 +104,6 @@ public sealed class Markup : Renderable, IHasJustification, IOverflowable
     public static Markup FromInterpolated(IFormatProvider provider, FormattableString value, Style? style = null)
     {
         return new Markup(EscapeInterpolated(provider, value), style);
-    }
-
-    /// <summary>
-    /// Escapes text so that it won’t be interpreted as markup.
-    /// </summary>
-    /// <param name="text">The text to escape.</param>
-    /// <returns>A string that is safe to use in markup.</returns>
-    public static string Escape(string text)
-    {
-        ArgumentNullException.ThrowIfNull(text);
-
-        return text.EscapeMarkup();
-    }
-
-    /// <summary>
-    /// Removes markup from the specified string.
-    /// </summary>
-    /// <param name="text">The text to remove markup from.</param>
-    /// <returns>A string that does not have any markup.</returns>
-    public static string Remove(string text)
-    {
-        ArgumentNullException.ThrowIfNull(text);
-
-        return text.RemoveMarkup();
     }
 
     internal static string EscapeInterpolated(IFormatProvider provider, FormattableString value)

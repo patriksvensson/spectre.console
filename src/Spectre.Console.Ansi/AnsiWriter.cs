@@ -1,4 +1,6 @@
 using System.IO;
+using System.Threading;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace Spectre.Console;
 
@@ -7,6 +9,7 @@ public sealed class AnsiWriter
     private readonly TextWriter _writer;
     private readonly ColorSystem _system;
     private readonly List<byte> _codes;
+    private int _linkCount;
 
     public AnsiWriter(TextWriter writer)
     {
@@ -47,6 +50,7 @@ public sealed class AnsiWriter
 
     public AnsiWriter ResetStyle()
     {
+        EndLink();
         WriteSgr(0);
         return this;
     }
@@ -80,12 +84,35 @@ public sealed class AnsiWriter
 
     public AnsiWriter Style(Style style)
     {
+        if (style.HasLink)
+        {
+            BeginLink(style.Link, style.LinkId);
+        }
+
         _codes.Clear();
         _codes.AddRange(AnsiDecorationBuilder.GetAnsiCodes(style.Decoration));
         _codes.AddRange(AnsiColorBuilder.GetAnsiCodes(_system, style.Foreground, true));
         _codes.AddRange(AnsiColorBuilder.GetAnsiCodes(_system, style.Background, false));
 
         WriteSgr(_codes);
+        return this;
+    }
+
+    public AnsiWriter BeginLink(string link, int? linkId = null)
+    {
+        _linkCount++;
+        _writer.Write($"\e]8;id={linkId};{link}\e\\");
+        return this;
+    }
+
+    public AnsiWriter EndLink()
+    {
+        if (_linkCount > 0)
+        {
+            _linkCount--;
+            _writer.Write("\e]8;;\e\\");
+        }
+
         return this;
     }
 

@@ -24,7 +24,19 @@ public sealed class Style : IEquatable<Style>
     /// <summary>
     /// Gets the link associated with the style.
     /// </summary>
-    public string? Link { get; }
+    public string? Link { get; private set; }
+
+    /// <summary>
+    /// Gets the link ID associated with the style.
+    /// </summary>
+    public int? LinkId { get; private set; }
+
+    /// <summary>
+    /// Gets whether or not the style has an associated link.
+    /// </summary>
+    [MemberNotNullWhen(true, nameof(Link))]
+    [MemberNotNullWhen(true, nameof(LinkId))]
+    public bool HasLink { get; private set; }
 
     /// <summary>
     /// Gets a <see cref="Style"/> with the
@@ -46,7 +58,8 @@ public sealed class Style : IEquatable<Style>
         Foreground = foreground ?? Color.Default;
         Background = background ?? Color.Default;
         Decoration = decoration ?? Decoration.None;
-        Link = link;
+
+        UpdateLink(link);
     }
 
     /// <summary>
@@ -91,6 +104,22 @@ public sealed class Style : IEquatable<Style>
     public static Style WithLink(string link)
     {
         return new Style(link: link);
+    }
+
+    internal void UpdateLink(string? link)
+    {
+        if (link == null)
+        {
+            Link = null;
+            LinkId = null;
+            HasLink = false;
+        }
+        else
+        {
+            Link = link;
+            LinkId = Random.Shared.Next(0, int.MaxValue);
+            HasLink = true;
+        }
     }
 
     /// <summary>

@@ -6,9 +6,43 @@ public sealed class AnsiMarkup(AnsiWriter writer)
 {
     private readonly AnsiWriter _writer = writer ?? throw new ArgumentNullException(nameof(writer));
 
-    public static IEnumerable<(string Text, Style Style)> Parse(string markup, Style? style = null)
+    public static IEnumerable<MarkupSegment> Parse(string markup, Style? style = null)
     {
-        return MarkupParser.Parse(markup, style);
+        return Merge(MarkupParser.Parse(markup, style));
+
+        static IEnumerable<MarkupSegment> Merge(IEnumerable<(string Text, Style Style)> items)
+        {
+            var result = new List<MarkupSegment>();
+
+            foreach (var (item, index) in items.Select((item, index) => (item, index)))
+            {
+                if (index > 0 && result.Count > 0)
+                {
+                    if (result[^1].Style.Equals(item.Style))
+                    {
+                        result[^1].Text += item.Text;
+                    }
+                    else
+                    {
+                        result.Add(new MarkupSegment
+                        {
+                            Text = item.Text,
+                            Style = item.Style,
+                        });
+                    }
+                }
+                else
+                {
+                    result.Add(new MarkupSegment
+                    {
+                        Text = item.Text,
+                        Style = item.Style,
+                    });
+                }
+            }
+
+            return result;
+        }
     }
 
     /// <summary>
@@ -56,33 +90,84 @@ public sealed class AnsiMarkup(AnsiWriter writer)
 
     public void Write(string markup, Style? style = null)
     {
-        var parts = Parse(markup, style).ToArray();
-        foreach (var (segmentText, segmentStyle) in Parse(markup, style))
+        var previousStyle = default(Style);
+        var shouldReset = false;
+
+        foreach (var segment in Parse(markup, style))
         {
-            if (!segmentStyle.Equals(Style.Plain))
-            {
-                _writer.Style(segmentStyle);
-            }
-
-            _writer.Write(segmentText);
-
-            if (!segmentStyle.Equals(Style.Plain))
+            if (previousStyle != null && !previousStyle.Equals(segment.Style) && shouldReset)
             {
                 _writer.ResetStyle();
+                shouldReset = false;
             }
+
+            if (previousStyle == null || !previousStyle.Equals(segment.Style))
+            {
+                if (!segment.Style.Equals(Style.Plain))
+                {
+                    _writer.Style(segment.Style);
+                    shouldReset = true;
+                }
+            }
+
+            _writer.Write(segment.Text);
+
+            previousStyle = segment.Style;
+        }
+
+        if (shouldReset)
+        {
+            _writer.ResetStyle();
         }
     }
 
-#if !NETSTANDARD
     public void Write(ref AnsiMarkupInterpolatedStringHandler markup, Style? style = null)
     {
         Write(markup.GetFormattedString(), style);
     }
-#endif
 
     public void WriteLine(string markup)
     {
         Write(markup);
         _writer.WriteLine();
+    }
+}
+
+
+public class MarkupSegment
+{
+    public required string Text { get; set; }
+    public required Style Style { get; init; }
+
+    public string Render()
+    {
+        return !Style.Equals(Style.Plain)
+            ? $"[{Style.ToMarkup()}]{Text}[/]"
+            : Text;
+    }
+
+    public static IEnumerable<MarkupSegment> Merge(IEnumerable<MarkupSegment> items)
+    {
+        var result = new List<MarkupSegment>();
+        foreach (var (item, index) in items.Select((item, index) => (item, index)))
+        {
+            if (index > 0 && result.Count > 0)
+            {
+                if (result[^1].Style.Equals(item.Style))
+                {
+                    result[^1].Text += item.Text;
+                }
+                else
+                {
+                    result.Add(item);
+                }
+            }
+            else
+            {
+                result.Add(item);
+            }
+        }
+
+        return result;
     }
 }

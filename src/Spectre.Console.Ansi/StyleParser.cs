@@ -62,7 +62,6 @@ internal static class StyleParser
             if (decoration != null)
             {
                 effectiveDecoration ??= Decoration.None;
-
                 effectiveDecoration |= decoration.Value;
             }
             else

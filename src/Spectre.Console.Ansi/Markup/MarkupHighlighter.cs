@@ -35,7 +35,8 @@ internal static class MarkupHighlighter
                     var beginning = part.Text[0..(startIndex - part.StartIndex)];
                     result.Add(new MarkupSegment
                     {
-                        Text = beginning, Style = part.Style,
+                        Text = beginning,
+                        Style = part.Style,
                     });
 
                     var centerStart = startIndex - part.StartIndex;
@@ -43,7 +44,8 @@ internal static class MarkupHighlighter
                     var center = part.Text.Substring(centerStart, centerEnd);
                     result.Add(new MarkupSegment
                     {
-                        Text = center, Style = style,
+                        Text = center,
+                        Style = style,
                     });
 
                     var endStart = part.Text.Length - center.Length - beginning.Length;
@@ -52,7 +54,8 @@ internal static class MarkupHighlighter
                         // Got an end as well
                         result.Add(new MarkupSegment
                         {
-                            Text = part.Text[^endStart..], Style = part.Style,
+                            Text = part.Text[^endStart..],
+                            Style = part.Style,
                         });
                     }
 
@@ -62,7 +65,8 @@ internal static class MarkupHighlighter
                 {
                     result.Add(new MarkupSegment
                     {
-                        Text = part.Text, Style = part.Style,
+                        Text = part.Text,
+                        Style = part.Style,
                     });
                 }
 
@@ -78,21 +82,24 @@ internal static class MarkupHighlighter
                 {
                     result.Add(new MarkupSegment
                     {
-                        Text = part.Text, Style = style,
+                        Text = part.Text,
+                        Style = style,
                     });
                 }
                 else
                 {
                     result.Add(new MarkupSegment
                     {
-                        Text = part.Text[..remaining], Style = style,
+                        Text = part.Text[..remaining],
+                        Style = style,
                     });
 
                     if (remaining < part.Text.Length)
                     {
                         result.Add(new MarkupSegment
                         {
-                            Text = part.Text[remaining..], Style = part.Style,
+                            Text = part.Text[remaining..],
+                            Style = part.Style,
                         });
                     }
                 }
@@ -101,7 +108,8 @@ internal static class MarkupHighlighter
             {
                 result.Add(new MarkupSegment
                 {
-                    Text = part.Text, Style = part.Style,
+                    Text = part.Text,
+                    Style = part.Style,
                 });
             }
         }
@@ -125,7 +133,9 @@ file sealed class IndexedMarkupSegment : MarkupSegment
         {
             var result = new IndexedMarkupSegment
             {
-                Text = x.Text, Style = x.Style, StartIndex = currentIndex,
+                Text = x.Text,
+                Style = x.Style,
+                StartIndex = currentIndex,
             };
 
             currentIndex += x.Text.Length;
