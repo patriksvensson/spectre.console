@@ -7,31 +7,17 @@ public sealed class AnsiWriter
     private readonly TextWriter _writer;
     private readonly ColorSystem _system;
     private readonly List<byte> _codes;
-    private readonly AnsiMarkup _markup;
 
     public AnsiWriter(TextWriter writer)
     {
         _writer = writer ?? throw new ArgumentNullException(nameof(writer));
         _system = ColorSystem.TrueColor;
         _codes = [];
-        _markup = new AnsiMarkup(this);
     }
 
     public AnsiWriter Flush()
     {
         _writer.Flush();
-        return this;
-    }
-
-    public AnsiWriter Markup(string markup)
-    {
-        _markup.Write(markup);
-        return this;
-    }
-
-    public AnsiWriter MarkupLine(string markup)
-    {
-        _markup.WriteLine(markup);
         return this;
     }
 

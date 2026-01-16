@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace Spectre.Console;
 
 /// <summary>
@@ -35,14 +33,7 @@ public static class StringExtensions
     /// <returns>A string that is safe to use in markup.</returns>
     public static string EscapeMarkup(this string? text)
     {
-        if (text == null)
-        {
-            return string.Empty;
-        }
-
-        return text
-            .ReplaceExact("[", "[[")
-            .ReplaceExact("]", "]]");
+        return AnsiMarkup.Escape(text);
     }
 
     /// <summary>
@@ -52,23 +43,7 @@ public static class StringExtensions
     /// <returns>A string that does not have any markup.</returns>
     public static string RemoveMarkup(this string? text)
     {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            return string.Empty;
-        }
-
-        var result = new StringBuilder();
-
-        var tokenizer = new MarkupTokenizer(text);
-        while (tokenizer.MoveNext() && tokenizer.Current != null)
-        {
-            if (tokenizer.Current.Kind == MarkupTokenKind.Text)
-            {
-                result.Append(tokenizer.Current.Lexeme);
-            }
-        }
-
-        return result.ToString();
+        return AnsiMarkup.Remove(text);
     }
 
     /// <summary>
