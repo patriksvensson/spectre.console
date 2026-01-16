@@ -39,7 +39,7 @@ public sealed class HighlightTests
             .HighlightMarkup("text with", _highlightStyle);
 
         // Then
-        result.ShouldBe("[red]Sample text[/] with test word");
+        result.ShouldBe("[red]Sample [/][bold on yellow]text with[/] test word");
     }
 
     [Fact]
