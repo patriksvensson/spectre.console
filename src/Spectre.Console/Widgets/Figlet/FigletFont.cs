@@ -60,10 +60,7 @@ public sealed class FigletFont
 
         foreach (var character in characters)
         {
-            if (!_characters.TryAdd(character.Code, character))
-            {
-                throw new InvalidOperationException("Character already exist");
-            }
+            _characters[character.Code] = character;
         }
 
         Height = header.Height;

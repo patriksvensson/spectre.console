@@ -4,14 +4,15 @@ namespace Spectre.Console.Tests.Unit;
 public sealed class FigletTests
 {
     [Theory]
-    [InlineData("starwars.flf")]
-    [InlineData("poison.flf")]
+    [InlineData(FigletTestFont.Big)]
+    [InlineData(FigletTestFont.StarWars)]
+    [InlineData(FigletTestFont.Poison)]
     [Expectation("Load_Stream")]
-    public async Task Should_Load_Font_From_Stream(string fontfile)
+    public async Task Should_Load_Font_From_Stream(FigletTestFont name)
     {
         // Given
         var console = new TestConsole().Width(180);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream($"Spectre.Console.Tests/Data/{fontfile}"));
+        var font = FigletTestFontLoader.Load(name);
         var text = new FigletText(font, "Patrik was here");
 
         // When
@@ -19,7 +20,8 @@ public sealed class FigletTests
 
         // Then
         await Verifier.Verify(console.Output)
-            .UseParameters(fontfile);
+            .UseParameters(
+                name.ToString().ToLowerInvariant());
     }
 
     [Fact]
@@ -43,7 +45,7 @@ public sealed class FigletTests
     {
         // Given
         var console = new TestConsole().Width(120);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream("Spectre.Console.Tests/Data/banner.flf"));
+        var font = FigletTestFontLoader.Load(FigletTestFont.Big);
         var text = new FigletText(font, "P");
 
         // When
@@ -135,14 +137,15 @@ public sealed class FigletTests
     }
 
     [Theory]
-    [InlineData("starwars.flf")]
-    [InlineData("poison.flf")]
+    [InlineData(FigletTestFont.Big)]
+    [InlineData(FigletTestFont.StarWars)]
+    [InlineData(FigletTestFont.Poison)]
     [Expectation("Render_Smushed_Universal")]
-    public async Task Should_Render_Smushed_Text_Correctly_Using_Universal_Smushing_Rules(string fontfile)
+    public async Task Should_Render_Smushed_Text_Correctly_Using_Universal_Smushing_Rules(FigletTestFont name)
     {
         // Given
         var console = new TestConsole().Width(120);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream($"Spectre.Console.Tests/Data/{fontfile}"));
+        var font = FigletTestFontLoader.Load(name);
         var text = new FigletText(font, "Spectre.Console")
         {
             LayoutMode = FigletLayoutMode.Smushed,
@@ -153,7 +156,8 @@ public sealed class FigletTests
 
         // Then
         await Verifier.Verify(console.Output)
-            .UseParameters(fontfile);
+            .UseParameters(
+                name.ToString().ToLowerInvariant());
     }
 
     [Fact]
@@ -162,7 +166,7 @@ public sealed class FigletTests
     {
         // Given
         var console = new TestConsole().Width(120);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream("Spectre.Console.Tests/Data/banner.flf"));
+        var font = FigletTestFontLoader.Load(FigletTestFont.Big);
         var text = new FigletText(font, "Spectre.Console")
         {
             LayoutMode = FigletLayoutMode.Smushed,
@@ -183,8 +187,7 @@ public sealed class FigletTests
     {
         // Given
         var console = new TestConsole().Width(120);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream("Spectre.Console.Tests/Data/banner.flf"));
-        var text = new FigletText(font, string.Empty)
+        var text = new FigletText(FigletFont.Default, string.Empty)
         {
             LayoutMode = mode,
         };
@@ -204,8 +207,7 @@ public sealed class FigletTests
     {
         // Given
         var console = new TestConsole().Width(120);
-        var font = FigletFont.Load(EmbeddedResourceReader.LoadResourceStream("Spectre.Console.Tests/Data/banner.flf"));
-        var text = new FigletText(font, "😄")
+        var text = new FigletText(FigletFont.Default, "😄")
         {
             LayoutMode = mode,
         };
@@ -215,5 +217,16 @@ public sealed class FigletTests
 
         // Then
         console.Output.ShouldBeEmpty();
+    }
+
+    [Fact]
+    [Expectation("Figlet_Report")]
+    public async Task Figlet_Report()
+    {
+        // Given, When
+        var report = FigletReportGenerator.Generate();
+
+        // Then
+        await Verifier.Verify(report);
     }
 }
