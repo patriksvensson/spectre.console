@@ -159,4 +159,21 @@ public partial class AnsiConsoleTests
             Should.NotThrow(When);
         }
     }
+
+    [Fact]
+    public void Should_Write_To_New_Output_If_Redirected()
+    {
+        // Given
+        var console = new TestConsole();
+        var redirected = new StringWriter();
+
+        // When
+        console.Write("ABC");
+        console.Profile.Out = new AnsiConsoleOutput(redirected);
+        console.Write("DEF");
+
+        // Then
+        console.Output.ShouldBe("ABC");
+        redirected.ToString().ShouldBe("DEF");
+    }
 }

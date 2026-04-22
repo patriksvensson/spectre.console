@@ -3,7 +3,8 @@ namespace Spectre.Console;
 internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 {
     private readonly IAnsiConsole _console;
-    private readonly AnsiWriter _writer;
+    private AnsiWriter _writer;
+    private IAnsiConsoleOutput _cachedOutput;
 
     public IAnsiConsoleCursor Cursor { get; }
     public Capabilities Capabilities => _console.Profile.Capabilities;
@@ -11,6 +12,7 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
     public AnsiConsoleBackend(IAnsiConsole console)
     {
         _console = console ?? throw new ArgumentNullException(nameof(console));
+        _cachedOutput = _console.Profile.Out;
         _writer = new AnsiWriter(_console.Profile.Out.Writer, _console.Profile.Capabilities);
 
         Cursor = new AnsiConsoleCursor(this);
@@ -18,8 +20,11 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 
     public void Clear(bool home)
     {
-        Write(w => w.EraseInDisplay(2));
-        Write(w => w.ClearScrollback());
+        Write(w =>
+        {
+            w.EraseInDisplay(2);
+            w.ClearScrollback();
+        });
 
         if (home)
         {
@@ -29,11 +34,26 @@ internal sealed class AnsiConsoleBackend : IAnsiConsoleBackend
 
     public void Write(IRenderable renderable)
     {
+        EnsureWriter();
         _writer.Write(_console, renderable);
     }
 
     public void Write(Action<AnsiWriter> action)
     {
+        EnsureWriter();
         action(_writer);
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private void EnsureWriter()
+    {
+        // Output has not changed?
+        if (ReferenceEquals(_cachedOutput, _console.Profile.Out))
+        {
+            return;
+        }
+
+        _cachedOutput = _console.Profile.Out;
+        _writer = new AnsiWriter(_console.Profile.Out.Writer, _console.Profile.Capabilities);
     }
 }
