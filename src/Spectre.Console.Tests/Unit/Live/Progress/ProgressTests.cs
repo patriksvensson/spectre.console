@@ -671,4 +671,60 @@ public sealed class ProgressTests
             .ShouldNotBeNull()
             .ShouldBeGreaterThan(0);
     }
+
+    [Fact]
+    public void Should_Exclude_Vertical_Padding()
+    {
+        // Given
+        var console = new TestConsole()
+            .Width(10)
+            .Interactive()
+            .EmitAnsiSequences();
+
+        var progress = new Progress(console)
+            .Columns(new ProgressBarColumn())
+            .AutoRefresh(false)
+            .AutoClear(false)
+            .ExcludeVerticalPadding();
+
+        // When
+        progress.Start(ctx => ctx.AddTask("foo"));
+
+        // Then
+        console.Output
+            .NormalizeLineEndings()
+            .ShouldBe(
+                "\e[?25l" + // Hide cursor
+                "\e[38;5;8m━━━━━━━━━━\e[0m\n" + // Task
+                "\e[?25h"); // show cursor
+    }
+
+    [Fact]
+    public void Should_Include_Vertical_Padding()
+    {
+        // Given
+        var console = new TestConsole()
+            .Width(10)
+            .Interactive()
+            .EmitAnsiSequences();
+
+        var progress = new Progress(console)
+            .Columns(new ProgressBarColumn())
+            .AutoRefresh(false)
+            .AutoClear(false)
+            .IncludeVerticalPadding();
+
+        // When
+        progress.Start(ctx => ctx.AddTask("foo"));
+
+        // Then
+        console.Output
+            .NormalizeLineEndings()
+            .ShouldBe(
+                "\e[?25l" + // Hide cursor
+                "          \n" + // Top padding
+                "\e[38;5;8m━━━━━━━━━━\e[0m\n" + // Task
+                "          \n" + // Bottom padding
+                "\e[?25h"); // show cursor
+    }
 }
